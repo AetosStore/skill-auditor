@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/31199488/README.md)
+[README.md]
 # Skill Auditor for Claude Code
 
 A read-only static auditor for Claude Code skills.
@@ -141,7 +141,7 @@ See [`references/checks.md`](references/checks.md) for the complete check catalo
 Clone the repository:
 
 ```bash
-git clone <YOUR-GITHUB-REPO-URL>
+git clone https://github.com/AetosStore/skill-auditor)
 cd skill-auditor
 ```
 
