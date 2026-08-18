@@ -140,7 +140,7 @@ See [`references/checks.md`](references/checks.md) for the complete check catalo
 Clone the repository:
 
 ```bash
-git clone https://github.com/AetosStore/skill-auditor)
+git clone https://github.com/AetosStore/skill-auditor
 cd skill-auditor
 ```
 
