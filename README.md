@@ -1,4 +1,3 @@
-[README.md]
 # Skill Auditor for Claude Code
 
 A read-only static auditor for Claude Code skills.
