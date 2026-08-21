@@ -2,7 +2,7 @@
 
 A read-only static auditor for Claude Code skills.
 
-**Current stable release: v2.3.0**
+**Current stable release: v2.3.1**
 
 Skill Auditor scans installed or supplied Claude Code skills for configuration problems, trigger conflicts, broken references, maintainability issues, coverage gaps, and potentially risky capabilities such as shell execution, network access, credential access, hooks, dependency installation, destructive filesystem operations, and external symlinks.
 
@@ -10,7 +10,7 @@ It is designed for **audit, triage, and skill optimization**, not security certi
 
 ## Status
 
-**v2.3.0 is the current validated release.**
+**v2.3.1 is the current validated release (v2.3.0 plus a docs-only TOC addition in references/checks.md).**
 
 The release has been tested against:
 
@@ -867,7 +867,7 @@ The scanner should make a reviewer faster, not replace the reviewer.
 
 ## Release
 
-**Current stable release: v2.3.0**
+**Current stable release: v2.3.1**
 
 Repository:
 
@@ -875,7 +875,7 @@ Repository:
 AetosStore/skill-auditor
 ```
 
-v2.3.0 is the recommended release for normal use.
+v2.3.1 is the recommended release for normal use.
 
 ---
 
