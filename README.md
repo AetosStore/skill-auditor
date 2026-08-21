@@ -1,16 +1,26 @@
-# Skill Auditor for Claude Code
+# Skill Auditor
 
-A read-only static auditor for Claude Code skills.
+A read-only static auditor for locally installed agent skills — Claude Code, OpenAI Codex CLI, the shared `.agents` convention, and the Hermes gateway.
 
-**Current stable release: v2.3.1**
+**Current stable release: v2.4.0**
 
-Skill Auditor scans installed or supplied Claude Code skills for configuration problems, trigger conflicts, broken references, maintainability issues, coverage gaps, and potentially risky capabilities such as shell execution, network access, credential access, hooks, dependency installation, destructive filesystem operations, and external symlinks.
+Skill Auditor scans installed or supplied skills for configuration problems, trigger conflicts, broken references, maintainability issues, coverage gaps, and potentially risky capabilities such as shell execution, network access, credential access, hooks, dependency installation, destructive filesystem operations, and external symlinks.
 
 It is designed for **audit, triage, and skill optimization**, not security certification.
 
+Claude Code behavior (precedence, plugin namespacing, plugin cache) is fully modeled. Codex, shared, and Hermes roots are covered at the discovery level: their skills get the full quality/security/maintainability analysis and are tagged with their agent, but no precedence/shadowing conclusions are drawn for them because those agents' loading semantics are not modeled.
+
 ## Status
 
-**v2.3.1 is the current validated release (v2.3.0 plus a docs-only TOC addition in references/checks.md).**
+**v2.4.0 is the current validated release (v2.3.1 plus cross-agent discovery and per-agent overlap semantics).**
+
+v2.4 changes:
+
+- default discovery adds `~/.codex/skills` (including Codex system skills under `.system/`), `~/.agents/skills`, project-level `.agents/skills`, `~/.hermes/skills` (nested category folders supported), `~/.hermes/skills-staging`, and Hermes `skills.external_dirs` from `~/.hermes/config.yaml`;
+- every discovered root and skill is tagged with its agent (`claude`, `codex`, `shared`, `hermes`) in JSON and report output;
+- same-name collisions involving non-Claude agents are reported as the new `overlap.cross-agent-same-name` INFO finding with an "agent semantics unknown" framing, instead of the Claude-only `overlap.precedence-shadowing` MEDIUM;
+- `overlap.bundled-override` is restricted to Claude Code skills;
+- output schema bumped to v6 (adds `agent` fields and `scanned_roots_detail`).
 
 The release has been tested against:
 
@@ -30,6 +40,8 @@ The release has been tested against:
 - a real Claude Code installation.
 
 The v2.3 symlink regression specifically verified that first-level symlinked skills are discovered and audited rather than silently skipped.
+
+The v2.4 cross-agent fixture verified that Codex (including `.system` skills), shared `.agents`, and Hermes roots (nested category folders, a symlinked staging entry, and a config-declared external dir) are all discovered with correct agent tags, that a Claude+shared same-name pair downgrades to INFO, and that a Claude-only personal/project same-name pair still produces the classic MEDIUM shadowing finding. A real multi-agent installation (231 skills across four agents) was scanned as a smoke test.
 
 ---
 
@@ -62,11 +74,12 @@ Examples:
 
 - similar auto-invocation metadata;
 - duplicate non-plugin commands;
-- precedence shadowing;
+- precedence shadowing (Claude Code skills only);
 - overlapping personal/project skills;
-- plugin namespace handling.
+- plugin namespace handling;
+- same-name copies across agents (reported as INFO inventory).
 
-Overlap detection is heuristic. A similarity finding does not prove that Claude will select the wrong skill.
+Overlap detection is heuristic. A similarity finding does not prove that the agent will select the wrong skill.
 
 ### Security and capability inventory
 
@@ -200,9 +213,21 @@ skill-audit-report.md
 
 ## Default discovery
 
-By default, Skill Auditor attempts to inspect normal Claude Code skill locations rather than requiring every path to be supplied manually.
+By default, Skill Auditor attempts to inspect normal local skill locations rather than requiring every path to be supplied manually.
 
-This includes personal/project skill locations and the installed Claude Code plugin cache where applicable.
+For Claude Code this includes personal/project skill locations and the installed plugin cache where applicable.
+
+### Cross-agent roots (v2.4)
+
+When present, these additional roots are scanned and tagged with their agent:
+
+| Agent | Roots |
+| --- | --- |
+| `codex` | `~/.codex/skills`, including bundled system skills under `.system/` |
+| `shared` | `~/.agents/skills` and project-level `.agents/skills` directories (the cross-agent AGENTS.md convention) |
+| `hermes` | `~/.hermes/skills` (skills may be nested inside category folders; recursion stops at the directory containing `SKILL.md`), `~/.hermes/skills-staging`, and any `skills.external_dirs` entries read from `~/.hermes/config.yaml` with a minimal stdlib parser |
+
+Non-Claude agents' loading order, precedence, and override semantics are **not** modeled. Their skills receive the full static analysis, but name collisions involving them are reported as `overlap.cross-agent-same-name` INFO ("agent semantics unknown") rather than as shadowing conclusions, and `overlap.bundled-override` never fires for them.
 
 ### Plugin discovery
 
@@ -518,7 +543,7 @@ Plugin namespaces are taken into account so two plugin commands with identical s
 ## Requirements
 
 - Python 3
-- Claude Code skills to inspect
+- locally installed agent skills to inspect
 - no external Python dependencies
 
 The static scanner uses only the Python standard library.
@@ -693,13 +718,13 @@ The rest of the package remains subject to normal analysis.
 
 The masking is surfaced as INFO instead of being silently hidden.
 
-The validated v2.3 build self-audits without CRITICAL or HIGH findings.
+The validated v2.4 build self-audits without CRITICAL or HIGH findings.
 
 ---
 
 ## Validation
 
-v2.3 has been smoke-tested at multiple levels.
+v2.3 was smoke-tested at multiple levels, and v2.4 adds a cross-agent discovery fixture on top of that suite.
 
 ### Fixture suite
 
@@ -764,8 +789,10 @@ That test was particularly useful in finding and fixing the first-level symlink 
 Current audit output schema:
 
 ```text
-v5
+v6
 ```
+
+v6 adds an `agent` field on every skill entry and a `scanned_roots_detail` list carrying per-root scope and agent tags.
 
 The schema includes structured information for findings, locations, severity, confidence, evidence, occurrence aggregation, coverage, and discovery metadata.
 
@@ -867,7 +894,7 @@ The scanner should make a reviewer faster, not replace the reviewer.
 
 ## Release
 
-**Current stable release: v2.3.1**
+**Current stable release: v2.4.0**
 
 Repository:
 
@@ -875,7 +902,7 @@ Repository:
 AetosStore/skill-auditor
 ```
 
-v2.3.1 is the recommended release for normal use.
+v2.4.0 is the recommended release for normal use. The installable package is `skill-auditor-v2.4.skill` in the repository root (a zip whose top level is the `skill-auditor/` folder).
 
 ---
 
